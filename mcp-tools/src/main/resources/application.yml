@@ -1,0 +1,9 @@
+server:
+  port: 8003  # MCP 工具服务端口
+
+# 大模型配置（替换成自己的 API 信息）
+openai:
+  api-key: sk-2b35de5d9b834523a0f6ca994faa4b5c
+  base-url: https://api.deepseek.com/v1
+  model: deepseek-chat
+  timeout: 30000

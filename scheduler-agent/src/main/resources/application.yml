@@ -1,0 +1,9 @@
+server:
+  port: 8000  # 调度 Agent 端口
+
+# 其他 Agent 地址
+agent:
+  generator:
+    url: http://localhost:8001
+  review:
+    url: http://localhost:8002

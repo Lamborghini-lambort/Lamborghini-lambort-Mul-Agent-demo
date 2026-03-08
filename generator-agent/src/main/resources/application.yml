@@ -1,0 +1,6 @@
+server:
+  port: 8001  # 生成 Agent 端口
+
+# MCP 工具地址
+mcp:
+  url: http://localhost:8003
