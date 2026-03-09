@@ -35,6 +35,8 @@ public class GeneratorController {
                     3. 语言风格适配移动端传播
                     """, sceneType, productInfo);
 
+            // TODO：这个不是agent自己调用MCP的工具，应该是大模型调用MCP工具
+
             // 3. 调用 MCP 工具生成文案
             String content = mcpClient.callGenerateText(prompt, 0.7);
 

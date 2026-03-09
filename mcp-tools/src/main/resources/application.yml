@@ -1,9 +1,19 @@
 server:
-  port: 8003  # MCP 工具服务端口
+  port: 8003
 
 # 大模型配置（替换成自己的 API 信息）
 openai:
-  api-key: sk-2b35de5d9b834523a0f6ca994faa4b5c
-  base-url: https://api.deepseek.com/v1
-  model: deepseek-chat
-  timeout: 30000
+  api-key: sk-aUbQL11X1SVze8SyD1sdbHyalmeLlJSLXqZL1vn8iumXdqVN
+  base-url: https://api.moonshot.cn/v1
+  model: moonshot-v1-8k
+  timeout: 60000
+
+# Spring AI MCP 服务器配置
+spring:
+  ai:
+    mcp:
+      server:
+        name: marketing-agent-server
+        version: 1.0.0
+        # 启用 SSE 传输
+        protocol: SSE

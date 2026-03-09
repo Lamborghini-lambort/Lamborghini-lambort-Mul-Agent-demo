@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Chat - 营销文案生成助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .message.user .message-label {
+            text-align: right;
+        }
+
+        .message.assistant .message-label {
+            text-align: left;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .tool-selector {
+            margin-bottom: 15px;
+        }
+
+        .tool-selector label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .tool-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .tool-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .success-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 12px 18px;
+            background: white;
+            border-radius: 18px;
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 MCP 营销文案助手</h1>
+            <p>基于 Model Context Protocol 的智能文案生成工具</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">
+                <div>
+                    <div class="message-label">MCP Assistant</div>
+                    <div class="message-content">
+                        👋 你好！我是智能营销文案助手。
+                        <br><br>
+                        ✨ 我会自动协调多个 AI Agent 为你服务：
+                        <br>
+                        📝 <strong>Generator Agent</strong> - 生成创意文案
+                        <br>
+                        ✅ <strong>Review Agent</strong> - 审核内容合规性
+                        <br><br>
+                        请输入产品信息，我将为你生成高质量的营销文案！
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div id="errorMessage" style="display: none;" class="error-message"></div>
+
+            <div class="input-wrapper">
+                <textarea 
+                    id="chatInput" 
+                    class="chat-input" 
+                    rows="1"
+                    placeholder="请输入产品信息，例如：新款智能手机，续航 10 小时，像素 5000 万..."
+                ></textarea>
+                <button id="sendButton" class="send-button">开始生成</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Scheduler-Agent 地址 (端口 8000)
+        const SCHEDULER_AGENT_URL = 'http://localhost:8000/a2a/scheduler/task';
+
+        // 添加消息到聊天界面
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const label = isUser ? 'You' : 'MCP Assistant';
+            messageDiv.innerHTML = `
+                <div>
+                    <div class="message-label">${label}</div>
+                    <div class="message-content">${content}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 显示加载动画
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.id = 'loadingMessage';
+            loadingDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 隐藏加载动画
+        function hideLoading() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // 调用 Scheduler-Agent
+        async function callSchedulerAgent(productInfo) {
+            console.log('🔍 开始调用 Scheduler-Agent:', SCHEDULER_AGENT_URL);
+            const requestBody = {
+                user_id: 'user-' + Date.now(),
+                product_info: productInfo,
+                scene_type: '电商推广'
+            };
+
+            try {
+                console.log('📤 发送请求:', JSON.stringify(requestBody, null, 2));
+                const response = await fetch(SCHEDULER_AGENT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                console.log('📥 响应状态:', response.status);
+                if (!response.ok) {
+                    throw new Error('服务器响应失败：' + response.status);
+                }
+
+                const result = await response.json();
+                console.log('✅ 收到结果:', result);
+                return result;
+            } catch (error) {
+                console.error('❌ Scheduler-Agent 调用错误:', error);
+                throw error;
+            }
+        }
+
+        // 处理发送
+        async function handleSend() {
+            const inputText = chatInput.value.trim();
+            if (!inputText) return;
+
+            // 禁用输入框和按钮
+            chatInput.disabled = true;
+            sendButton.disabled = true;
+
+            try {
+                // 添加用户消息
+                addMessage(inputText, true);
+                chatInput.value = '';
+
+                // 显示加载动画
+                showLoading();
+
+                // 调用 Scheduler-Agent（由它协调各个 Agent）
+                const result = await callSchedulerAgent(inputText);
+
+                // 隐藏加载动画
+                hideLoading();
+
+                // 处理结果
+                if (result && result.success && result.data) {
+                    const { content, review_result } = result.data;
+                    
+                    // 显示生成的文案
+                    addMessage('📝 <strong>生成的文案：</strong><br>' + content, false);
+                    
+                    // 显示审核结果
+                    if (review_result) {
+                        const statusBadge = review_result.is_compliant 
+                            ? '<span class="success-badge">✅ 合规</span>' 
+                            : '<span class="success-badge" style="background: #f44336;">❌ 不合规</span>';
+                        addMessage(`${statusBadge}<br><strong>审核结果：</strong>${review_result.reason}`, false);
+                    }
+                } else {
+                    showError('未收到有效响应：' + (result?.error || '未知错误'));
+                }
+            } catch (error) {
+                hideLoading();
+                showError('请求失败：' + error.message);
+                console.error('Scheduler-Agent 调用错误:', error);
+            } finally {
+                // 重新启用输入框和按钮
+                chatInput.disabled = false;
+                sendButton.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        // 事件监听
+        sendButton.addEventListener('click', handleSend);
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+
+        // 自动调整文本框高度
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // 页面加载完成
+        window.addEventListener('load', () => {
+            chatInput.focus();
+        });
+    </script>
+</body>
+</html>

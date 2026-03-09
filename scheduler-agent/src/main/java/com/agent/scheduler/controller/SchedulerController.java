@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/a2a/scheduler")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*") // 允许跨域访问
 public class SchedulerController {
     private final A2aClient a2aClient;
 
